@@ -1,4 +1,4 @@
-package com.yy.cs.dbutil.aop;
+package com.tanghd.spring.dbutil.aop;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

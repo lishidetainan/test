@@ -1,4 +1,4 @@
-package com.yy.cs.dbutil.aop;
+package com.tanghd.spring.dbutil.aop;
 
 import java.lang.reflect.Method;
 
@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import com.yy.cs.dbutil.datasource.DynamicDataSource;
+import com.tanghd.spring.dbutil.datasource.DynamicDataSource;
 
 @Aspect
 public class DataSourceAspect {

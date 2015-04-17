@@ -1,4 +1,4 @@
-package com.yy.cs.dbutil.aop;
+package com.tanghd.spring.dbutil.aop;
 
 import java.lang.reflect.Method;
 
@@ -6,7 +6,7 @@ import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 
-import com.yy.cs.dbutil.datasource.DynamicDataSource;
+import com.tanghd.spring.dbutil.datasource.DynamicDataSource;
 
 public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvice, ThrowsAdvice {
 
