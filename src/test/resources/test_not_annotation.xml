@@ -38,14 +38,14 @@
 	<bean id="advisor" class="com.tanghd.spring.dbutil.aop.DataSourceAdvisor" />
 	<aop:config proxy-target-class="true">
 		<aop:advisor advice-ref="advisor"
-			pointcut="@annotation(com.tanghd.spring.dbutil.aop.DataSourceChange)" />
+			pointcut="execution(* com.tanghd.spring..*.test*(..))" />
 	</aop:config>
 
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dynamicDataSource" />
 	</bean>
 
-	<bean id="test" class="com.tanghd.spring.dbutil.test.TestAdvisor">
+	<bean id="test" class="com.tanghd.spring.dbutil.test.TestWithoutAnnotation">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 

@@ -19,6 +19,12 @@ public class TestAdvisor {
         System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
     }
 
+    @DataSourceChange(slave = true)
+    public void testThrowing() throws Exception {
+        System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
+        throw new Exception("testThrowing");
+    }
+
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
     }
@@ -29,9 +35,16 @@ public class TestAdvisor {
 
     @SuppressWarnings("resource")
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath*:test_advisor.xml.xml");
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath*:test_advisor.xml");
         TestAdvisor t = context.getBean(TestAdvisor.class);
         t.test1();
+        System.out.println("----------------------------------------");
         t.test2();
+        System.out.println("----------------------------------------");
+        try {
+            t.testThrowing();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 }

@@ -5,8 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.tanghd.spring.dbutil.aop.DataSourceChange;
 
-public class TestAspect {
-
+public class TestWithoutAnnotation {
     private JdbcTemplate jdbcTemplate;
 
     @DataSourceChange(slave = true)
@@ -16,6 +15,16 @@ public class TestAspect {
 
     @DataSourceChange(slave = true)
     public void test2() {
+        System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
+    }
+
+    @DataSourceChange(slave = true)
+    public void testThrowing() throws Exception {
+        System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
+        throw new Exception("testThrowing");
+    }
+
+    public void noSwitch() {
         System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
     }
 
@@ -29,10 +38,19 @@ public class TestAspect {
 
     @SuppressWarnings("resource")
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath*:test_aspect.xml");
-        TestAspect t = context.getBean(TestAspect.class);
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
+                "classpath*:test_not_annotation.xml");
+        TestWithoutAnnotation t = context.getBean(TestWithoutAnnotation.class);
         t.test1();
         System.out.println("----------------------------------------");
         t.test2();
+        System.out.println("----------------------------------------");
+        try {
+            t.testThrowing();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        System.out.println("----------------------------------------");
+        t.noSwitch();
     }
 }
