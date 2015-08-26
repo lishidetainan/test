@@ -34,7 +34,7 @@ public class SwitchSlaveDataSourceAdvisor implements MethodBeforeAdvice, AfterRe
 
     @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
-        DynamicDataSource.useMaster();
+        DynamicDataSource.useSlave();
         switched.set(true);
     }
 

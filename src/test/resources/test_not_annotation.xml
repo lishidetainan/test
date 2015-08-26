@@ -35,7 +35,7 @@
 	</bean>
 
 
-	<bean id="advisor" class="com.tanghd.spring.dbutil.aop.DataSourceAdvisor" />
+	<bean id="advisor" class="com.tanghd.spring.dbutil.aop.SwitchSlaveDataSourceAdvisor" />
 	<aop:config proxy-target-class="true">
 		<aop:advisor advice-ref="advisor"
 			pointcut="execution(* com.tanghd.spring..*.test*(..))" />

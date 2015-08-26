@@ -8,17 +8,14 @@ import com.tanghd.spring.dbutil.aop.DataSourceChange;
 public class TestWithoutAnnotation {
     private JdbcTemplate jdbcTemplate;
 
-    @DataSourceChange(slave = true)
     public void test1() {
         System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
     }
 
-    @DataSourceChange(slave = true)
     public void test2() {
         System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
     }
 
-    @DataSourceChange(slave = true)
     public void testThrowing() throws Exception {
         System.out.println(jdbcTemplate.queryForList("select * from test where id=1"));
         throw new Exception("testThrowing");
