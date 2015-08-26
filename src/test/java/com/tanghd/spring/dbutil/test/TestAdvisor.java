@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.tanghd.spring.dbutil.aop.DataSourceChange;
 
-public class Test {
+public class TestAdvisor {
 
     private JdbcTemplate jdbcTemplate;
 
@@ -29,8 +29,8 @@ public class Test {
 
     @SuppressWarnings("resource")
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath*:test.xml");
-        Test t = context.getBean(Test.class);
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath*:test_advisor.xml.xml");
+        TestAdvisor t = context.getBean(TestAdvisor.class);
         t.test1();
         t.test2();
     }
