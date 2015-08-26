@@ -10,21 +10,22 @@
 	<dependency>
 		<groupId>com.tanghd.spring</groupId>
 		<artifactId>dbutil</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.2</version>
 	</dependency>
 		
 ### 配置xml (spring + mybatis)
 
 	<bean id="dataSource" ...></bean>
-	<bean id="dataSource2" ...></bean>
+	<bean id="slaveDataSource1" ...></bean>
+	<bean id="slaveDataSource2" ...></bean>
 		
 	<bean id="dynamicDataSource" class="com.tanghd.spring.dbutil.datasource.DynamicDataSource">
-		<property name="dataSources">
-			<map>
-				<!--注意，default 必须设置，作为默认的数据源-->
-				<entry key="default" value-ref="dataSource"></entry>
-				<entry key="readonly" value-ref="dataSource2"></entry>
-			</map>
+		<property name="master" ref="dataSource"/>
+		<property name="slaves">
+			<list>
+				<value ref="slaveDataSource1"/>
+				<value ref="slaveDataSource2"/>
+			</list>
 		</property>
 	</bean>
 		
@@ -36,7 +37,7 @@
 ### 代码里使用
 
 	public void queryXXX(){
-		DynamicDataSource.use("readonly");
+		DynamicDataSource.useSlave();
 		try{
 			...
 		}finally{
@@ -66,7 +67,7 @@
 		
 *	代码示例：
 
-		@DataSourceChange("readonly")
+		@DataSourceChange(slave=true)
 		public void queryXXX(){
 			...
 		}

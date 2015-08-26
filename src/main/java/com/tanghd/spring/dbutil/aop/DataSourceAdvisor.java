@@ -12,7 +12,7 @@ public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvi
 
     public void afterThrowing(Method method, Object[] args, Object target, Exception ex) {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
-        if (null != annotation.value() && !"".equals(annotation.value())) {
+        if (null != annotation) {
             DynamicDataSource.reset();
         }
     }
@@ -20,7 +20,7 @@ public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvi
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
-        if (null != annotation.value() && !"".equals(annotation.value())) {
+        if (null != annotation) {
             DynamicDataSource.reset();
         }
     }
@@ -28,8 +28,12 @@ public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvi
     @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
-        if (null != annotation.value() && !"".equals(annotation.value())) {
-            DynamicDataSource.use(annotation.value());
+        if (null != annotation) {
+            if (annotation.slave()) {
+                DynamicDataSource.useSlave();
+            } else {
+                DynamicDataSource.useMaster();
+            }
         }
     }
 

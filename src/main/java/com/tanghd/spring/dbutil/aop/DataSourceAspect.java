@@ -13,7 +13,7 @@ import com.tanghd.spring.dbutil.datasource.DynamicDataSource;
 @Aspect
 public class DataSourceAspect {
 
-    @Pointcut(value = "@annotation(com.yy.cs.dbutil.aop.DataSourceChange)")
+    @Pointcut(value = "@annotation(com.tanghd.spring.dbutil.aop.DataSourceChange)")
     private void changeDS() {
     }
 
@@ -25,11 +25,13 @@ public class DataSourceAspect {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
         boolean selectedDataSource = false;
         try {
-            String selDs = null;
-            if (null != annotation.value() && !"".equals(annotation.value())) {
+            if (null != annotation) {
                 selectedDataSource = true;
-                selDs = annotation.value();
-                DynamicDataSource.use(selDs);
+                if (annotation.slave()) {
+                    DynamicDataSource.useSlave();
+                } else {
+                    DynamicDataSource.useMaster();
+                }
             }
             retVal = pjp.proceed();
         } catch (Throwable e) {
