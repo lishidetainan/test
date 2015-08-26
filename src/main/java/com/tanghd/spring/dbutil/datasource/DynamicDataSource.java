@@ -12,12 +12,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
+/**
+ * 继承{@link org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource}
+ * 配置主从数据源后，根据选择，返回对应的数据源。多个从库的情况下，会平均的分配从库，用于负载均衡。
+ * 
+ * @author tanghd
+ *
+ */
 public class DynamicDataSource extends AbstractRoutingDataSource {
 
     private static final Logger LOG = LoggerFactory.getLogger(DynamicDataSource.class);
 
-    private DataSource master;
-    private List<DataSource> slaves;
+    private DataSource master; // 主库，只允许有一个
+    private List<DataSource> slaves; // 从库，允许有多个
     private AtomicLong slaveCount = new AtomicLong();
     private int slaveSize = 0;
 
@@ -35,6 +42,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 
     };
 
+    /**
+     * 初始化
+     */
     @Override
     public void afterPropertiesSet() {
         if (null == master) {
@@ -52,6 +62,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         super.afterPropertiesSet();
     }
 
+    /**
+     * 选择使用主库，并把选择放到当前ThreadLocal的栈顶
+     */
     public static void useMaster() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("use datasource :" + datasourceHolder.get());
@@ -60,6 +73,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         m.offerFirst(DEFAULT);
     }
 
+    /**
+     * 选择使用从库，并把选择放到当前ThreadLocal的栈顶
+     */
     public static void useSlave() {
         if (LOG.isDebugEnabled()) {
             LOG.debug("use datasource :" + datasourceHolder.get());
@@ -68,6 +84,9 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         m.offerFirst(SLAVE);
     }
 
+    /**
+     * 重置当前栈
+     */
     public static void reset() {
         LinkedList<String> m = datasourceHolder.get();
         if (LOG.isDebugEnabled()) {
@@ -78,6 +97,10 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         }
     }
 
+    /**
+     * 如果是选择使用从库，且从库的数量大于1，则通过取模来控制从库的负载,
+     * 计算结果返回AbstractRoutingDataSource
+     */
     @Override
     protected Object determineCurrentLookupKey() {
         LinkedList<String> m = datasourceHolder.get();
@@ -89,7 +112,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
             if (DEFAULT.equals(key)) {
                 return key;
             } else if (SLAVE.equals(key)) {
-                if (slaveSize > 1) {//Slave loadBalance
+                if (slaveSize > 1) {// Slave loadBalance
                     long c = slaveCount.incrementAndGet();
                     c = c % slaveSize;
                     return SLAVE + (c + 1);

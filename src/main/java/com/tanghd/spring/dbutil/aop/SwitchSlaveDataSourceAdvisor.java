@@ -8,6 +8,12 @@ import org.springframework.aop.ThrowsAdvice;
 
 import com.tanghd.spring.dbutil.datasource.DynamicDataSource;
 
+/**
+ * 默认符合切面的方法调用，都会直接切换使用从库
+ * 
+ * @author tanghd
+ *
+ */
 public class SwitchSlaveDataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvice, ThrowsAdvice {
 
     private static final ThreadLocal<Boolean> switched = new ThreadLocal<Boolean>() {
