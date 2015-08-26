@@ -73,4 +73,11 @@
 		}
 		
 #### SpringAOP
-不使用aspect，这种方式提供了支持@See DataSourceAdvisor.java，目前还没用到，示例略，只是配置上和Aspect不同，使用方式同样是通过注解来进行改变当前使用的数据源		
+不使用aspect，这种方式提供了支持@See DataSourceAdvisor.java，目前还没用到，示例略，只是配置上和Aspect不同，使用方式同样是通过注解来进行改变当前使用的数据源
+以下是参考例子:
+
+		<bean id="advisor" class="com.tanghd.spring.dbutil.aop.DataSourceAdvisor" />
+		<aop:config proxy-target-class="true">
+			<aop:advisor advice-ref="advisor"
+				pointcut="@annotation(com.tanghd.spring.dbutil.aop.DataSourceChange)" />
+		</aop:config>		
