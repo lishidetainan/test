@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.sql.DataSource;
@@ -11,6 +16,9 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
+
+import com.tanghd.spring.dbutil.health.JdbcConnectionChecker;
+import com.tanghd.spring.dbutil.health.SlaveDataSourceHealthChecker;
 
 /**
  * 继承{@link org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource}
@@ -22,14 +30,6 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 public class DynamicDataSource extends AbstractRoutingDataSource {
 
     private static final Logger LOG = LoggerFactory.getLogger(DynamicDataSource.class);
-
-    private DataSource master; // 主库，只允许有一个
-    private List<DataSource> slaves; // 从库，允许有多个
-    private AtomicLong slaveCount = new AtomicLong();
-    private int slaveSize = 0;
-
-    private Map<Object, Object> dataSources = new HashMap<Object, Object>();
-
     private static final String DEFAULT = "master";
     private static final String SLAVE = "slave";
 
@@ -42,6 +42,21 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 
     };
 
+    private ScheduledExecutorService scheduleService = Executors.newSingleThreadScheduledExecutor();
+
+    private DataSource master; // 主库，只允许有一个
+
+    private List<DataSource> slaves; // 从库，允许有多个
+    private CopyOnWriteArrayList<String> slaveKeys;
+
+    private AtomicLong slaveCount = new AtomicLong();
+
+    private boolean slaveHealthCheck;
+    private int healthCheckPeriod;
+    private JdbcConnectionChecker healthChecker;
+    private SlaveDataSourceHealthChecker slaveChecker;
+    private Map<Object, Object> dataSources = new HashMap<Object, Object>();
+
     /**
      * 初始化
      */
@@ -52,14 +67,28 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         }
         dataSources.put(DEFAULT, master);
         if (null != slaves && slaves.size() > 0) {
+            slaveKeys = new CopyOnWriteArrayList<String>();
             for (int i = 0; i < slaves.size(); i++) {
-                dataSources.put(SLAVE + (i + 1), slaves.get(i));
+                String key = SLAVE + (i + 1);
+                dataSources.put(key, slaves.get(i));
+                slaveKeys.add(key);
             }
-            slaveSize = slaves.size();
+            startHealthChecker();
         }
         this.setDefaultTargetDataSource(master);
         this.setTargetDataSources(dataSources);
         super.afterPropertiesSet();
+    }
+
+    private void startHealthChecker() {
+        if (slaveHealthCheck && null != healthChecker) {
+            if (healthCheckPeriod <= 1) {
+                healthCheckPeriod = 1;
+            }
+            slaveChecker = new SlaveDataSourceHealthChecker(slaveKeys, dataSources, healthChecker);
+            scheduleService.scheduleAtFixedRate(slaveChecker, this.healthCheckPeriod, this.healthCheckPeriod,
+                    TimeUnit.MINUTES);
+        }
     }
 
     /**
@@ -112,12 +141,21 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
             if (DEFAULT.equals(key)) {
                 return key;
             } else if (SLAVE.equals(key)) {
+                int index = -1;
+                int slaveSize = slaveKeys.size();
                 if (slaveSize > 1) {// Slave loadBalance
                     long c = slaveCount.incrementAndGet();
                     c = c % slaveSize;
-                    return SLAVE + (c + 1);
+                    index = (int) c;
+                } else if (slaveSize == 0) {
+                    return null;
                 } else {
-                    return SLAVE + "1";
+                    index = 0;
+                }
+                try {
+                    return slaveKeys.get(index);
+                } catch (Exception e) {
+                    return null;
                 }
             }
             return null;
@@ -140,6 +178,30 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 
     public void setSlaves(List<DataSource> slaves) {
         this.slaves = slaves;
+    }
+
+    public int getHealthCheckPeriod() {
+        return healthCheckPeriod;
+    }
+
+    public void setHealthCheckPeriod(int healthCheckPeriod) {
+        this.healthCheckPeriod = healthCheckPeriod;
+    }
+
+    public boolean isSlaveHealthCheck() {
+        return slaveHealthCheck;
+    }
+
+    public void setSlaveHealthCheck(boolean slaveHealthCheck) {
+        this.slaveHealthCheck = slaveHealthCheck;
+    }
+
+    public JdbcConnectionChecker getHealthChecker() {
+        return healthChecker;
+    }
+
+    public void setHealthChecker(JdbcConnectionChecker healthChecker) {
+        this.healthChecker = healthChecker;
     }
 
 }
