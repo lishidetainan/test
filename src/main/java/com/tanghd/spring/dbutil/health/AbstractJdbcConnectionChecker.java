@@ -8,7 +8,6 @@ import javax.sql.DataSource;
 
 public abstract class AbstractJdbcConnectionChecker implements JdbcConnectionChecker {
 
-    @Override
     public boolean isAlive(DataSource ds) {
         Connection conn = null;
         try {

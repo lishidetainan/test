@@ -23,7 +23,6 @@ public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvi
         }
     }
 
-    @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
         if (null != annotation) {
@@ -31,7 +30,6 @@ public class DataSourceAdvisor implements MethodBeforeAdvice, AfterReturningAdvi
         }
     }
 
-    @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
         DataSourceChange annotation = method.getAnnotation(DataSourceChange.class);
         if (null != annotation) {

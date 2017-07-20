@@ -31,14 +31,12 @@ public class SwitchSlaveDataSourceAdvisor implements MethodBeforeAdvice, AfterRe
         }
     }
 
-    @Override
     public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
         if (switched.get()) {
             DynamicDataSource.reset();
         }
     }
 
-    @Override
     public void before(Method method, Object[] args, Object target) throws Throwable {
         DynamicDataSource.useSlave();
         switched.set(true);
