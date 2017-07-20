@@ -7,6 +7,5 @@ public class TestClass {
 		
 		System.out.println("this is master test commit");
 		
-		System.out.println("this is wgc test commit");
 	}
 }
