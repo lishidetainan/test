@@ -4,5 +4,6 @@ public class TestClass {
 
 	public static void main(String[] args) {
 		System.out.println("this is wgc breach test");
+		System.out.println("welcome to china");
 	}
 }
